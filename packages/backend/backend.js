@@ -9,6 +9,10 @@ app.get("/", (req, res) => {
     res.send("steamNgin");
 });
 
+app.get("/app", (req, res) => {
+    res.send("steamNgin");
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
   });
