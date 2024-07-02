@@ -1,8 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express, { json } from "express";
 import fetch from "node-fetch";
-const app = express();
-const port = 8000;
 
+const app = express();
+const PORT = 8000;
+const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 
 app.use(express.json());
 
@@ -18,14 +21,17 @@ app.get("/app", (req, res) => {
 	res.send("steamNgin");
 });
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Example app listening on port ${PORT}`);
   });
 
 
 async function getPlayerCount() {
 	try {
-		const response = await fetch('https://api.steampowered.com/ISteamApps/GetAppList/v2/'); // ISteamApps
+		// const response = await fetch('https://api.steampowered.com/ISteamApps/GetAppList/v2/'); // ISteamApps
+        // const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
+        const response = await fetch(`https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`); 
+        // IStoreService
 
 		if (!response.ok) 
 			{
@@ -33,6 +39,7 @@ async function getPlayerCount() {
 			}
 		const data = await response.json();
 		const apps = data.applist.apps;
+        let count = 0;
 
         for (const app of apps) 
             {
@@ -41,7 +48,9 @@ async function getPlayerCount() {
                     const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`);
                     const data = await response.json()
                     const playerCount = data.response.player_count
+                    count++;
                     console.log(`${app.name}'s player count: ${playerCount}`);
+                    console.log(`Count: ${count}`)
                 }
                 catch (error) {
                     console.error(`Could not retrieve App ID:${app.appid}'s player count`);
