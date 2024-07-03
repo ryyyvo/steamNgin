@@ -28,9 +28,13 @@ app.listen(PORT, () => {
 
 async function getPlayerCount() {
 	try {
-		// const response = await fetch('https://api.steampowered.com/ISteamApps/GetAppList/v2/'); // ISteamApps
-        // const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
-        const response = await fetch(`https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`); 
+        const response = await fetch(`https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&
+            include_games=true&
+            include_dlc=false&
+            include_software=true&
+            include_videos=false&
+            include_hardware=false&
+            max_results=50000`); 
         // IStoreService
 
 		if (!response.ok) 
@@ -38,7 +42,7 @@ async function getPlayerCount() {
 				throw new Error('Could not retrieve applist ' + response.statusText);
 			}
 		const data = await response.json();
-		const apps = data.applist.apps;
+		const apps = data.response.apps;
         let count = 0;
 
         for (const app of apps) 
