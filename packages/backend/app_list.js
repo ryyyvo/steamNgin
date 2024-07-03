@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import fetch from "node-fetch";
-import fs, { existsSync } from 'fs';
+import fs from 'fs';
 
 const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 
