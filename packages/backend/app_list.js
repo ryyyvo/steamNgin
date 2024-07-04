@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 import fetch from "node-fetch";
 import fs from 'fs';
-import getPlayerCount from './player_count';
 
 const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 
@@ -74,7 +73,7 @@ async function getRemainingApps(lastAppId) {
 function removeFieldsFromApps() { 
     const data = JSON.parse(fs.readFileSync(APP_LIST_PATH, 'utf8'));
 
-    data.response.apps = data.response.apps.map(app =>{
+    data.response.apps = data.response.apps.map(app => {
         const { last_modified, price_change_number, ...rest } = app;
         return rest;
     });
@@ -83,9 +82,5 @@ function removeFieldsFromApps() {
     console.log('Fields removed and file updated.');
 
 }
-
-
-
-
 
 getAppList()
