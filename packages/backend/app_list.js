@@ -2,10 +2,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 import fetch from "node-fetch";
 import fs from 'fs';
+import getPlayerCount from './player_count';
 
 const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 
 const URL = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
+const APP_LIST_PATH = './packages/backend/app_list.json'
 
 async function getAppList() {
     try {
@@ -19,7 +21,7 @@ async function getAppList() {
     
         const data = await response.json();
     
-        fs.writeFileSync('./packages/backend/app_list.json', JSON.stringify(data, null, 2));
+        fs.writeFileSync(APP_LIST_PATH, JSON.stringify(data, null, 2));
         console.log('Initial data saved.');
     
         if (data.response.have_more_results) {
@@ -44,9 +46,9 @@ async function getRemainingApps(lastAppId) {
             const data = await response.json();
 
             // Append new apps to the existing JSON file 
-            const existingData = JSON.parse(fs.readFileSync('./packages/backend/app_list.json'));
+            const existingData = JSON.parse(fs.readFileSync(APP_LIST_PATH));
             existingData.response.apps.push(...data.response.apps);
-            fs.writeFileSync('./packages/backend/app_list.json', JSON.stringify(existingData, null, 2));
+            fs.writeFileSync(APP_LIST_PATH, JSON.stringify(existingData, null, 2));
             console.log('Appended new data');
 
             // Update the lastAppId and hasMore variables
@@ -61,69 +63,29 @@ async function getRemainingApps(lastAppId) {
     }
     
     // Remove the have_more_results and last_appid JSON element from app_list 
-    const existingData = JSON.parse(fs.readFileSync('./packages/backend/app_list.json'));
+    const existingData = JSON.parse(fs.readFileSync(APP_LIST_PATH));
     delete existingData.response.have_more_results;
     delete existingData.response.last_appid;
-    fs.writeFileSync('./packages/backend/app_list.json', JSON.stringify(existingData, null, 2));
+    fs.writeFileSync(APP_LIST_PATH, JSON.stringify(existingData, null, 2));
+    removeFieldsFromApps()
 }
 
-async function getPlayerCount() {
-	try {
-        const response = await fetch(`https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&
-            include_games=true&
-            include_dlc=false&
-            include_software=true&
-            include_videos=false&
-            include_hardware=false&
-            max_results=50000`); 
-        // IStoreService
+// Remove last_modified and price_change_number elements from json
+function removeFieldsFromApps() { 
+    const data = JSON.parse(fs.readFileSync(APP_LIST_PATH, 'utf8'));
 
-		if (!response.ok) 
-			{
-				throw new Error('Could not retrieve applist ' + response.statusText);
-			}
+    data.response.apps = data.response.apps.map(app =>{
+        const { last_modified, price_change_number, ...rest } = app;
+        return rest;
+    });
 
-		const data = await response.json();
-        if (data.response.have_more_results === true) 
-        {
+    fs.writeFileSync(APP_LIST_PATH, JSON.stringify(data, null, 2));
+    console.log('Fields removed and file updated.');
 
-        }
-		const apps = data.response.apps;
-        let count = 0;
-
-        for (const app of apps) 
-            {
-                console.log(`App ID: ${app.appid}, App Name: ${app.name}`);
-                try {
-                    const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`);
-                    const data = await response.json()
-                    const playerCount = data.response.player_count
-                    count++;
-                    console.log(`${app.name}'s player count: ${playerCount}`);
-                    console.log(`Count: ${count}`)
-                }
-                catch (error) {
-                    console.error(`Could not retrieve App ID:${app.appid}'s player count`);
-                }
-                
-            }
-	}
-	catch (error) {
-		console.error('There was a problem with the fetch operation', error);
-	}
 }
 
-async function test_getPlayerCount()
-{
-    try {
-        const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=440`);
-        const data = await response.json()
-        const playerCount = data.response.player_count
-        console.log(`Team Fortress 2's player count: ${playerCount}`);
-    }
-    catch (error) {
-		console.error('There was a problem with the fetch operation', error);
-	}
-}
+
+
+
 
 getAppList()
