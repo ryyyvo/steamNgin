@@ -23,8 +23,8 @@ async function fetchPlayerCount(app) {
         else {
             app.player_count = 0;
         }
-        console.log(`App ID: ${app.appid}, App Name: ${app.name}`);
-        console.log(`Player count: ${app.player_count}`);
+        // console.log(`App ID: ${app.appid}, App Name: ${app.name}`);
+        // console.log(`Player count: ${app.player_count}`);
     } catch (error) {
         app.player_count = 0;
         console.error(`Could not retrieve App ID:${app.appid}'s player count`);
@@ -40,16 +40,21 @@ async function getPlayerCount() {
     const apps = copiedObject.response.apps;
     const results = [];
 
+    console.time('Total Fetch Time'); // Start timing
+
     for (let i = 0; i < apps.length; i += BATCH_SIZE) {
+        console.time(`Batch ${i/BATCH_SIZE + 1} Time`);
         const batch = apps.slice(i, i + BATCH_SIZE);
         const batchResults = await Promise.all(
             batch.map(app => limit(() => fetchPlayerCount(app)))
         );
         results.push(...batchResults);
+        console.timeEnd(`Batch ${i/BATCH_SIZE + 1} Time`); // End timing the batch
         console.log(`Fetched player counts for ${i + BATCH_SIZE} apps.\n999th appid: ${batchResults[999].appid}`);
     }
 
     fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(copiedObject, null, 2));
+    console.timeEnd('Total Fetch Time'); // End timing
     console.log('Fetched all player counts');
 }
 
