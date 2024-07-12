@@ -25,11 +25,11 @@ async function getPlayerCount() {
                 const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`);
                 const data = await response.json()
                 const playerCount = data.response.player_count
-                if (playerCount === undefined) {
-                    app.player_count = 0;
+                if (playerCount !== undefined) {
+                    app.player_count = playerCount;
                 }
                 else {
-                    app.player_count = playerCount;
+                    app.player_count = 0;
                 }
                 console.log(`Player count: ${app.player_count}`);
             }
@@ -63,7 +63,7 @@ function sortByPlayerCount() {
     fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
 }
 
-// getPlayerCount()
+getPlayerCount()
 // sortByPlayerCount()
 
 // export default getPlayerCount;
