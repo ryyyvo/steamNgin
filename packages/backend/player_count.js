@@ -8,8 +8,7 @@ const APP_LIST_PATH = './packages/backend/app_list.json'
 
 // open the app_list.json, loop through the apps, use fetch to get the playercount based off of app.appid
 // (in case of a network error in retrieving player_count.json) write a function to save progress of current json and retry the fetch again
-// or, on error, set the player count to 0 
-// or, on error, set player count to -1 and then loop through checking for apps who's playercount is -1, then attempt to find it again
+// when error occurs: record appid and save to array. after line 21 for loop done, can run while loop on array to try to finish getting error'd player counts
 
 async function getPlayerCount() {
 
@@ -26,12 +25,11 @@ async function getPlayerCount() {
                 const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`);
                 const data = await response.json()
                 const playerCount = data.response.player_count
-                if (!playerCount) {
+                if (playerCount === undefined) {
                     app.player_count = 0;
                 }
                 else {
                     app.player_count = playerCount;
-                    
                 }
                 console.log(`Player count: ${app.player_count}`);
             }
@@ -59,24 +57,13 @@ async function test_getPlayerCount()
 	}
 }
 
-function setPlayerCountZero() {
-    const existingData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    for (const app of existingData.response.apps)
-    {
-        if (app.player_count === undefined) {
-            app.player_count = 0;
-            console.log(`${app.player_count}`)
-        }
-    }
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(existingData, null, 2));
-}
-
 function sortByPlayerCount() {
     const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
     jsonData.response.apps.sort((a,b) => b.player_count - a.player_count);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
 }
 
 // getPlayerCount()
-// setPlayerCountZero()
+// sortByPlayerCount()
 
 // export default getPlayerCount;
