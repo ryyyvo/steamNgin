@@ -6,8 +6,8 @@ import pLimit from 'p-limit';
 
 const PLAYER_COUNT_PATH = './packages/backend/player_count.json'
 const APP_LIST_PATH = './packages/backend/app_list.json'
-let BATCH_SIZE = 1000; // Start with a moderate value
-let CONCURRENCY_LIMIT = 5; // Start with a low value
+const BATCH_SIZE = 1000; // Start with a moderate value
+const CONCURRENCY_LIMIT = 5; // Start with a low value
 const RETRY_LIMIT = 3; // Number of retries
 const TIMEOUT_MS = 10000; // Timeout for fetch requests in milliseconds
 
@@ -76,13 +76,58 @@ async function getPlayerCount() {
     fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(copiedObject, null, 2));
     console.timeEnd('Total Fetch Time'); // End timing
     console.log('Fetched all player counts');
+    sortByPlayerCount();
 }
 
-function sortByPlayerCount() {
+function sortByPlayerCountAscending() {
+    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonData.response.apps.sort((a,b) => a.player_count - b.player_count);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    console.log(`Sorted player counts in ascending order.`);
+}
+
+function sortByPlayerCountDescending() {
     const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
     jsonData.response.apps.sort((a,b) => b.player_count - a.player_count);
     fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    console.log(`Sorted player counts in descending order.`);
 }
 
-getPlayerCount()
-sortByPlayerCount()
+function sortByAppIdAscending() {
+    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonData.response.apps.sort((a, b) => a.app_id - b.app_id);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    console.log(`Sorted app id's in ascending order.`);
+}
+
+function sortByAppIdDescending() {
+    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonData.response.apps.sort((a, b) => b.app_id - a.app_id);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    console.log(`Sorted app id's in descending order.`);
+}
+
+function sortByNameAscending() {
+    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonData.response.apps.sort((a, b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+    });
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    console.log(`Sorted names in alphabetical order.`);
+}
+
+function sortByNameDescending() {
+    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonData.response.apps.sort((a, b) => {
+        if (a.name < b.name) return 1;
+        if (a.name > b.name) return -1;
+        return 0;
+    });
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    console.log(`Sorted names in reverse alphabetical order.`);
+}
+
+// getPlayerCount();
+sortByNameDescending();
