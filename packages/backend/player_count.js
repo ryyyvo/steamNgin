@@ -2,59 +2,80 @@ import dotenv from 'dotenv';
 dotenv.config();
 import fetch from "node-fetch";
 import fs from 'fs';
+import pLimit from 'p-limit';
 
-const PLAYER_COUNT_PATH = './packages/backend/player_count.json'
+const PLAYER_COUNT_PATH = './packages/backend/batch_player_count.json'
 const APP_LIST_PATH = './packages/backend/app_list.json'
+let BATCH_SIZE = 1000; // Start with a moderate value
+let CONCURRENCY_LIMIT = 5; // Start with a low value
+const RETRY_LIMIT = 3; // Number of retries
+const TIMEOUT_MS = 10000; // Timeout for fetch requests in milliseconds
 
-// open the app_list.json, loop through the apps, use fetch to get the playercount based off of app.appid
-// (in case of a network error in retrieving player_count.json) write a function to save progress of current json and retry the fetch again
-// when error occurs: record appid and save to array. after line 21 for loop done, can run while loop on array to try to finish getting error'd player counts
+const limit = pLimit(CONCURRENCY_LIMIT);
 
-async function getPlayerCount() {
-
-    const data = fs.readFileSync(APP_LIST_PATH, 'utf8');
-
-    const jsonObject = JSON.parse(data);
-
-    const copiedObject = JSON.parse(JSON.stringify(jsonObject));
-
-    for (const app of copiedObject.response.apps) 
-        {
-            console.log(`App ID: ${app.appid}, App Name: ${app.name}`);
-            try {
-                const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`);
-                const data = await response.json()
-                const playerCount = data.response.player_count
-                if (playerCount !== undefined) {
-                    app.player_count = playerCount;
-                }
-                else {
-                    app.player_count = 0;
-                }
-                console.log(`Player count: ${app.player_count}`);
-            }
-            catch (error) {
-                app.player_count = 0
-                console.error(`Could not retrieve App ID:${app.appid}'s player count`);
-            }
-            
-        }
-    
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(copiedObject, null, 2));
-
+async function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function test_getPlayerCount()
-{
-    try {
-        const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=440`);
-        const data = await response.json()
-        const playerCount = data.response.player_count
-        console.log(`Team Fortress 2's player count: ${playerCount}`);
+async function fetchPlayerCount(app) {
+    for (let attempt = 0; attempt < RETRY_LIMIT; attempt++) {
+        try {
+            const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`, 
+                { signal: AbortSignal.timeout(TIMEOUT_MS) });
+            const data = await response.json();
+            const playerCount = data.response.player_count;
+            if (playerCount !== undefined) {
+                app.player_count = playerCount;
+            }
+            else {
+                app.player_count = 0;
+            }
+            return app; // Return the app if successful
+        } catch (error) {
+            console.warn(`Attempt ${attempt + 1} failed for App ID:${app.appid}: ${error.message}`);
+            if (attempt < RETRY_LIMIT - 1) {
+                await delay(1000); // Wait 1 second before retrying
+            }
+        }
     }
-    catch (error) {
-		console.error('There was a problem with the fetch operation', error);
-	}
+    app.player_count = 0; // Set player count to 0 after all retries fail
+    console.error(`Could not retrieve App ID:${app.appid}'s player count after ${RETRY_LIMIT} attempts`);
+    return app;
+}
+
+async function getPlayerCount() {
+    const data = fs.readFileSync(APP_LIST_PATH, 'utf8');
+    const jsonObject = JSON.parse(data);
+    const copiedObject = JSON.parse(JSON.stringify(jsonObject));
+
+    const apps = copiedObject.response.apps;
+    const results = [];
+
+    console.time('Total Fetch Time'); // Start timing
+
+    for (let i = 0; i < apps.length; i += BATCH_SIZE) {
+        const batchStartIndex = i;
+        const batchEndIndex = Math.min(i + BATCH_SIZE, apps.length) - 1;
+
+        console.time(`Batch ${i / BATCH_SIZE + 1} Time`); // Start timing the batch
+        const batch = apps.slice(i, i + BATCH_SIZE);
+
+        try {
+            const batchResults = await Promise.all(
+                batch.map(app => limit(() => fetchPlayerCount(app)))
+            );
+            results.push(...batchResults);
+            console.log(`Fetched player counts for ${i + BATCH_SIZE} apps.\n999th appid: ${batchResults[499].appid}`);
+        } catch (error) {
+            console.error(`Batch ending at index ${batchEndIndex} encountered an error: ${error}`);
+        }
+        console.timeEnd(`Batch ${i / BATCH_SIZE + 1} Time`); // End timing the batch
+        console.log(`Fetched player counts for batch ending at index ${batchEndIndex}`);
+    }
+
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(copiedObject, null, 2));
+    console.timeEnd('Total Fetch Time'); // End timing
+    console.log('Fetched all player counts');
 }
 
 function sortByPlayerCount() {
@@ -64,6 +85,4 @@ function sortByPlayerCount() {
 }
 
 getPlayerCount()
-// sortByPlayerCount()
-
-// export default getPlayerCount;
+sortByPlayerCount()
