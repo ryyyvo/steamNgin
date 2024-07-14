@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import fs from 'fs';
 import pLimit from 'p-limit';
 
-const PLAYER_COUNT_PATH = './packages/backend/batch_player_count.json'
+const PLAYER_COUNT_PATH = './packages/backend/player_count.json'
 const APP_LIST_PATH = './packages/backend/app_list.json'
 let BATCH_SIZE = 1000; // Start with a moderate value
 let CONCURRENCY_LIMIT = 5; // Start with a low value
