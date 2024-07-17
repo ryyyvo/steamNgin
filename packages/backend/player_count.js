@@ -6,12 +6,12 @@ import pLimit from 'p-limit';
 
 const PLAYER_COUNT_PATH = './packages/backend/player_count.json'
 const APP_LIST_PATH = './packages/backend/app_list.json'
-const BATCH_SIZE = 1000; // Start with a moderate value
-const CONCURRENCY_LIMIT = 5; // Start with a low value
+const BATCH_SIZE = 1000; 
+const CONCURRENCY_LIMIT = 5; 
 const RETRY_LIMIT = 3; // Number of retries
 const TIMEOUT_MS = 10000; // Timeout for fetch requests in milliseconds
 
-const limit = pLimit(CONCURRENCY_LIMIT);
+export const limit = pLimit(CONCURRENCY_LIMIT);
 
 async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -43,7 +43,7 @@ async function fetchPlayerCount(app) {
     return app;
 }
 
-async function getPlayerCount() {
+export async function getPlayerCount() {
     const data = fs.readFileSync(APP_LIST_PATH, 'utf8');
     const jsonObject = JSON.parse(data);
     const copiedObject = JSON.parse(JSON.stringify(jsonObject));
@@ -73,61 +73,89 @@ async function getPlayerCount() {
         console.log(`Fetched player counts for batch ending at index ${batchEndIndex}`);
     }
 
+    copiedObject.response.apps.sort((a,b) => b.player_count - a.player_count);
     fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(copiedObject, null, 2));
     console.timeEnd('Total Fetch Time'); // End timing
     console.log('Fetched all player counts');
-    sortByPlayerCount();
+}
+
+export async function refreshTopGames(numberOfTopGames) {
+    const data = fs.readFileSync(PLAYER_COUNT_PATH, 'utf8');
+    const jsonObject = JSON.parse(data);
+    jsonObject.response.apps.sort((a,b) => b.player_count - a.player_count);
+    const apps = jsonObject.response.apps;
+    const results = [];
+
+    console.time('Total Fetch Time'); // Start timing
+
+    const batch = apps.slice(0, numberOfTopGames);
+
+    try {
+        const batchResults = await Promise.all(
+            batch.map(app => limit(() => fetchPlayerCount(app)))
+        );
+        results.push(...batchResults);
+        console.log(`Fetched player counts for ${numberOfTopGames} apps.`);
+    } catch (error) {
+        console.error(`Batch encountered an error: ${error}`);
+    }
+
+    // Sort the data again
+    jsonObject.response.apps.sort((a, b) => b.player_count - a.player_count);
+
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
+    console.timeEnd('Total Fetch Time'); // End timing
+    console.log(`Refreshed the player count of the top ${numberOfTopGames} games.`);
 }
 
 function sortByPlayerCountAscending() {
-    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonData.response.apps.sort((a,b) => a.player_count - b.player_count);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonObject.response.apps.sort((a,b) => a.player_count - b.player_count);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
     console.log(`Sorted player counts in ascending order.`);
 }
 
 function sortByPlayerCountDescending() {
-    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonData.response.apps.sort((a,b) => b.player_count - a.player_count);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonObject.response.apps.sort((a,b) => b.player_count - a.player_count);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
     console.log(`Sorted player counts in descending order.`);
 }
 
 function sortByAppIdAscending() {
-    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonData.response.apps.sort((a, b) => a.app_id - b.app_id);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonObject.response.apps.sort((a, b) => a.app_id - b.app_id);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
     console.log(`Sorted app id's in ascending order.`);
 }
 
 function sortByAppIdDescending() {
-    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonData.response.apps.sort((a, b) => b.app_id - a.app_id);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonObject.response.apps.sort((a, b) => b.app_id - a.app_id);
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
     console.log(`Sorted app id's in descending order.`);
 }
 
 function sortByNameAscending() {
-    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonData.response.apps.sort((a, b) => {
+    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonObject.response.apps.sort((a, b) => {
         if (a.name < b.name) return -1;
         if (a.name > b.name) return 1;
         return 0;
     });
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
     console.log(`Sorted names in alphabetical order.`);
 }
 
 function sortByNameDescending() {
-    const jsonData = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonData.response.apps.sort((a, b) => {
+    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
+    jsonObject.response.apps.sort((a, b) => {
         if (a.name < b.name) return 1;
         if (a.name > b.name) return -1;
         return 0;
     });
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonData, null, 2));
+    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
     console.log(`Sorted names in reverse alphabetical order.`);
 }
 
 // getPlayerCount();
-sortByNameDescending();
