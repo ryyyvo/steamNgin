@@ -8,10 +8,9 @@ const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 const URL = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
 const APP_LIST_PATH = './packages/backend/app_list.json'
 
-async function getAppList() {
+export async function getAppList() {
     try {
         const response = await fetch(URL); 
-        // IStoreService
     
         if (!response.ok) 
             {
@@ -82,5 +81,3 @@ function removeFieldsFromApps() {
     console.log('Fields removed and file updated.');
 
 }
-
-getAppList()
