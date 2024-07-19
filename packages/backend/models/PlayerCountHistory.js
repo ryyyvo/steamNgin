@@ -22,7 +22,6 @@ const playerCountHistorySchema = new Schema(
             }
         ]
     },
-    { timestamps: true }
 );
 
 const PlayerCountHistory = mongoose.model("PlayerCountHistory", playerCountHistorySchema);

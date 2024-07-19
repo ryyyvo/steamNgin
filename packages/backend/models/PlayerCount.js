@@ -26,8 +26,10 @@ const playerCountSchema = new Schema(
             default: 0
         }
     },
-    { timestamps: true }
+    { collection: 'playercounts' }
 );
+
+playerCountSchema.index({ appid: 1 }); 
 
 const PlayerCount = mongoose.model("PlayerCount", playerCountSchema);
 
