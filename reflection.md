@@ -12,6 +12,8 @@ used batch processing and got time down to 2 hours.
 deciding how to go about refreshing player count and the batch size
 # 6 
 creating the schema and how I should store the data 
+# 7 
+changing storing data from local json to mongodb and adjust the code accordingly 
 
 
 
