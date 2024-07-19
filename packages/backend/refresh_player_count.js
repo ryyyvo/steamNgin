@@ -1,4 +1,4 @@
-import { getPlayerCount, refreshTopGames} from "./player_count.js";
+import { populatePlayerCount, refreshTopGames} from "./player_count.js";
 import { getAppList } from "./app_list.js";
 import schedule from "node-schedule";
 // player_count.json already exists
@@ -10,24 +10,24 @@ async function runTasks() {
     async function runGetPlayerCount() {
       getPlayerCountRunning = true;
       try {
-        console.log('Running getPlayerCount at 12 AM PST');
+        console.log('Running populatePlayerCount at 12 AM PST');
         await getAppList();
-        await getPlayerCount();
+        await populatePlayerCount();
       } catch (err) {
         console.error(err);
       } finally {
         getPlayerCountRunning = false;
         // Schedule the next run of refreshTopGames
         scheduleRefreshTopGames();
-        console.log('getPlayerCount has finished');
+        console.log('populatePlayerCount has finished');
       }
     }
   
-    // Schedule getPlayerCount to run at 12 AM PST every day
+    // Schedule populatePlayerCount to run at 12 AM PST every day
     schedule.scheduleJob('0 0 * * *', async () => {
       if (refreshTopGamesRunning) {
-        console.log('Waiting for refreshTopGames to complete before running getPlayerCount');
-        // Wait for refreshTopGames to complete before starting getPlayerCount
+        console.log('Waiting for refreshTopGames to complete before running populatePlayerCount');
+        // Wait for refreshTopGames to complete before starting populatePlayerCount
         const checkInterval = setInterval(() => {
           if (!refreshTopGamesRunning) {
             clearInterval(checkInterval);
