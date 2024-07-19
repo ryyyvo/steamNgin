@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
-dotenv.config();
 import fetch from "node-fetch";
 import fs from 'fs';
 import pLimit from 'p-limit';
+
+dotenv.config();
 
 const PLAYER_COUNT_PATH = './packages/backend/player_count.json'
 const APP_LIST_PATH = './packages/backend/app_list.json'

@@ -15,13 +15,14 @@ const playerCountHistorySchema = new Schema(
                 required: true
             }
         ],
-        timestamps: [ 
+        timestamps: [
             {
                 type: Date,
                 required: true
             }
         ]
-    }
+    },
+    { timestamps: true }
 );
 
 const PlayerCountHistory = mongoose.model("PlayerCountHistory", playerCountHistorySchema);

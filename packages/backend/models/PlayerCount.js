@@ -4,28 +4,29 @@ const Schema = mongoose.Schema;
 
 const playerCountSchema = new Schema(
     {
-    appid: {
-        type: Number,
-        required: true,
-        unique: true
+        appid: {
+            type: Number,
+            required: true,
+            unique: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        playerCount: {
+            type: Number,
+            default: 0
+        },
+        peak24hr: {
+            type: Number,
+            default: 0
+        },
+        peakAllTime: {
+            type: Number,
+            default: 0
+        }
     },
-    name: {
-        type: String,
-        required: true
-    },
-    playerCount: {
-        type: Number,
-        default: 0
-    },
-    peak24hr: {
-        type: Number,
-        default: 0
-    },
-    peakAllTime: {
-        type: Number,
-        default: 0
-    }
-    }
+    { timestamps: true }
 );
 
 const PlayerCount = mongoose.model("PlayerCount", playerCountSchema);

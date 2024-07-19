@@ -1,12 +1,14 @@
 import dotenv from 'dotenv';
-dotenv.config();
 import fetch from "node-fetch";
-import fs from 'fs';
+import connectDB from './db/db.js';
+import PlayerCount from './models/PlayerCount.js';
+
+dotenv.config();
 
 const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
-
 const URL = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
-const APP_LIST_PATH = './packages/backend/app_list.json'
+
+connectDB();
 
 export async function getAppList() {
     try {
@@ -18,8 +20,8 @@ export async function getAppList() {
             }
     
         const data = await response.json();
+        await saveDataToMongo(data.response.apps);
     
-        fs.writeFileSync(APP_LIST_PATH, JSON.stringify(data, null, 2));
         console.log('Initial data saved.');
     
         if (data.response.have_more_results) {
@@ -29,7 +31,6 @@ export async function getAppList() {
     catch (error) {
         console.error('Error getting app list:', error);
     }
-
 }
 
 async function getRemainingApps(lastAppId) {
@@ -38,46 +39,41 @@ async function getRemainingApps(lastAppId) {
 
     while (hasMore) {
         try {
-            // Modify URL to include lastAppId to get the next fetch call
             const nextUrl = `${URL}&last_appid=${currentLastAppId}`;
             const response = await fetch(nextUrl);
             const data = await response.json();
 
-            // Append new apps to the existing JSON file 
-            const existingData = JSON.parse(fs.readFileSync(APP_LIST_PATH));
-            existingData.response.apps.push(...data.response.apps);
-            fs.writeFileSync(APP_LIST_PATH, JSON.stringify(existingData, null, 2));
-            console.log('Appended new data');
+            await saveDataToMongo(data.response.apps);
 
-            // Update the lastAppId and hasMore variables
             hasMore = data.response.have_more_results;
             currentLastAppId = data.response.last_appid;
-        }
-        
-        catch (error) {
+        } catch (error) {
             console.error('Error getting remaining app list:', error);
             break;
         }
     }
-    
-    // Remove the have_more_results and last_appid JSON element from app_list 
-    const existingData = JSON.parse(fs.readFileSync(APP_LIST_PATH));
-    delete existingData.response.have_more_results;
-    delete existingData.response.last_appid;
-    fs.writeFileSync(APP_LIST_PATH, JSON.stringify(existingData, null, 2));
-    removeFieldsFromApps()
 }
 
-// Remove last_modified and price_change_number elements from json
-function removeFieldsFromApps() { 
-    const data = JSON.parse(fs.readFileSync(APP_LIST_PATH, 'utf8'));
+async function saveDataToMongo(apps) {
+    try {
+        for (const app of apps) {
+            const { appid, name } = app;
+            const existingApp = await PlayerCount.findOne({ appid });
 
-    data.response.apps = data.response.apps.map(app => {
-        const { last_modified, price_change_number, ...rest } = app;
-        return rest;
-    });
+            if (existingApp) {
+                existingApp.name = name;
+                await existingApp.save();
+            } else {
+                const newApp = new PlayerCount({
+                    appid,
+                    name
+                });
+                await newApp.save();
+            }
+        }
 
-    fs.writeFileSync(APP_LIST_PATH, JSON.stringify(data, null, 2));
-    console.log('Fields removed and file updated.');
-
+        console.log('Data saved to MongoDB');
+    } catch (error) {
+        console.error('Error saving data to MongoDB:', error);
+    }
 }
