@@ -1,16 +1,22 @@
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import fetch from "node-fetch";
-import connectDB from './db/db.js';
 import PlayerCount from './models/PlayerCount.js';
 
 dotenv.config();
 
+const MONGO_URI = process.env.MONGO_URI;
 const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 const URL = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
 
-connectDB();
-
 export async function getAppList() {
+    try {
+        await mongoose.connect(MONGO_URI);
+        console.log('MongoDB connected');
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err.message);
+        process.exit(1);
+    }
     try {
         const response = await fetch(URL); 
     
@@ -31,6 +37,7 @@ export async function getAppList() {
     catch (error) {
         console.error('Error getting app list:', error);
     }
+    mongoose.disconnect();
 }
 
 async function getRemainingApps(lastAppId) {
@@ -44,6 +51,7 @@ async function getRemainingApps(lastAppId) {
             const data = await response.json();
 
             await saveDataToMongo(data.response.apps);
+            console.log('The next 50k apps have been retrieved.');
 
             hasMore = data.response.have_more_results;
             currentLastAppId = data.response.last_appid;
@@ -52,18 +60,22 @@ async function getRemainingApps(lastAppId) {
             break;
         }
     }
+    console.log('All apps retrieved.');
 }
 
 async function saveDataToMongo(apps) {
     try {
         for (const app of apps) {
             const { appid, name } = app;
+
+            if (!name) {
+                console.warn(`Missing name for app: ${JSON.stringify(app)}`);
+                continue; // Skip this app if data is incomplete
+            }
+
             const existingApp = await PlayerCount.findOne({ appid });
 
-            if (existingApp) {
-                existingApp.name = name;
-                await existingApp.save();
-            } else {
+            if (!existingApp) {
                 const newApp = new PlayerCount({
                     appid,
                     name
@@ -71,9 +83,10 @@ async function saveDataToMongo(apps) {
                 await newApp.save();
             }
         }
-
         console.log('Data saved to MongoDB');
     } catch (error) {
         console.error('Error saving data to MongoDB:', error);
     }
 }
+
+getAppList();
