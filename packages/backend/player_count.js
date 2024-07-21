@@ -76,5 +76,3 @@ export async function populatePlayerCount(numberOfTopGames = null) {
     }
     mongoose.disconnect();
 }
-
-populatePlayerCount();
