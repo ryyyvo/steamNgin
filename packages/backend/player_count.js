@@ -39,7 +39,7 @@ async function fetchPlayerCount(app) {
     console.error(`Could not retrieve App ID:${app.appid}'s player count after ${RETRY_LIMIT} attempts`);
 }
 
-export async function populatePlayerCount() {
+export async function populatePlayerCount(numberOfTopGames = null) {
     try {
         await mongoose.connect(MONGO_URI);
         console.log('MongoDB connected');
@@ -50,8 +50,14 @@ export async function populatePlayerCount() {
 
     console.time('Total Fetch Time'); // Start timing
 
-    const apps = await PlayerCount.find({}, 'appid -_id').lean(); // Select only appid field
+    let query = PlayerCount.find({}, 'appid -_id').lean();
+
+    if (numberOfTopGames !== null) {
+        query = query.sort({ playerCount: -1 }).limit(numberOfTopGames);
+    }
     
+    const apps = await query;
+
     for (let i = 0; i < apps.length; i += CONCURRENCY_LIMIT) {
         const batch = apps.slice(i, i + CONCURRENCY_LIMIT);
         try {
@@ -62,81 +68,13 @@ export async function populatePlayerCount() {
     }
 
     console.timeEnd('Total Fetch Time'); // End timing
-    console.log('Fetched all player counts');
-    mongoose.disconnect();
-}
-
-export async function refreshTopGames(numberOfTopGames) {
-    try {
-        await mongoose.connect(MONGO_URI);
-        console.log('MongoDB connected');
-    } catch (err) {
-        console.error('Error connecting to MongoDB:', err.message);
-        process.exit(1);
+    if (numberOfTopGames !== null) {
+        console.log(`Fetched the top ${numberOfTopGames} games' player count`)
     }
-
-    console.time('Total Fetch Time'); // Start timing
-    const apps = await PlayerCount.find().sort({ playerCount: -1 }).limit(numberOfTopGames);
-
-    try {
-        await Promise.all(apps.map(app => limit(() => fetchPlayerCount(app))));
-        console.log(`Refreshed the player count of the top ${numberOfTopGames} games.`);
-    } catch (error) {
-        console.error(`Batch encountered an error: ${error}`);
+    else {
+        console.log('Fetched all player counts');
     }
-
-    console.timeEnd('Total Fetch Time'); // End timing
     mongoose.disconnect();
-}
-
-function sortByPlayerCountAscending() {
-    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonObject.response.apps.sort((a,b) => a.player_count - b.player_count);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
-    console.log(`Sorted player counts in ascending order.`);
-}
-
-function sortByPlayerCountDescending() {
-    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonObject.response.apps.sort((a,b) => b.player_count - a.player_count);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
-    console.log(`Sorted player counts in descending order.`);
-}
-
-function sortByAppIdAscending() {
-    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonObject.response.apps.sort((a, b) => a.app_id - b.app_id);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
-    console.log(`Sorted app id's in ascending order.`);
-}
-
-function sortByAppIdDescending() {
-    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonObject.response.apps.sort((a, b) => b.app_id - a.app_id);
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
-    console.log(`Sorted app id's in descending order.`);
-}
-
-function sortByNameAscending() {
-    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonObject.response.apps.sort((a, b) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
-    });
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
-    console.log(`Sorted names in alphabetical order.`);
-}
-
-function sortByNameDescending() {
-    const jsonObject = JSON.parse(fs.readFileSync(PLAYER_COUNT_PATH));
-    jsonObject.response.apps.sort((a, b) => {
-        if (a.name < b.name) return 1;
-        if (a.name > b.name) return -1;
-        return 0;
-    });
-    fs.writeFileSync(PLAYER_COUNT_PATH, JSON.stringify(jsonObject, null, 2));
-    console.log(`Sorted names in reverse alphabetical order.`);
 }
 
 populatePlayerCount();
