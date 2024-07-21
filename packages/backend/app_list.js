@@ -26,6 +26,7 @@ export async function getAppList() {
             }
     
         const data = await response.json();
+        console.time('Total Fetch Time'); // Start timing
         await saveDataToMongo(data.response.apps);
     
         console.log('Initial data saved.');
@@ -37,6 +38,7 @@ export async function getAppList() {
     catch (error) {
         console.error('Error getting app list:', error);
     }
+    console.timeEnd('Total Fetch Time'); // End timing
     mongoose.disconnect();
 }
 
@@ -63,9 +65,40 @@ async function getRemainingApps(lastAppId) {
     console.log('All apps retrieved.');
 }
 
+// async function saveDataToMongo(apps) {
+//     try {
+//         for (const app of apps) {
+//             const { appid, name } = app;
+
+//             if (!name) {
+//                 console.warn(`Missing name for app: ${JSON.stringify(app)}`);
+//                 continue; // Skip this app if data is incomplete
+//             }
+
+//             const existingApp = await PlayerCount.findOne({ appid });
+
+//             if (!existingApp) {
+//                 const newApp = new PlayerCount({
+//                     appid,
+//                     name
+//                 });
+//                 await newApp.save();
+//                 console.log(`Appid:${appid} has been added to the collection`);
+//             }
+//             else {
+//                 console.log(`Appid:${appid} is already in the collection`);
+//             }
+//         }
+//         console.log('Data saved to MongoDB');
+//     } catch (error) {
+//         console.error('Error saving data to MongoDB:', error);
+//     }
+// }
+
 async function saveDataToMongo(apps) {
     try {
-        for (const app of apps) {
+        for (let i = apps.length - 1; i >= 0; i--) {
+            const app = apps[i];
             const { appid, name } = app;
 
             if (!name) {
@@ -75,18 +108,23 @@ async function saveDataToMongo(apps) {
 
             const existingApp = await PlayerCount.findOne({ appid });
 
-            if (!existingApp) {
-                const newApp = new PlayerCount({
-                    appid,
-                    name
-                });
-                await newApp.save();
+            if (existingApp) {
+                console.log(`Appid:${appid} is already in the collection`);
+                return; // Exit the function early if the app is already in the collection
             }
+
+            const newApp = new PlayerCount({
+                appid,
+                name
+            });
+            await newApp.save();
+            console.log(`Appid:${appid} has been added to the collection`);
         }
         console.log('Data saved to MongoDB');
     } catch (error) {
         console.error('Error saving data to MongoDB:', error);
     }
 }
+
 
 getAppList();
