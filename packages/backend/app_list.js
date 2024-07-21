@@ -125,6 +125,3 @@ async function saveDataToMongo(apps) {
         console.error('Error saving data to MongoDB:', error);
     }
 }
-
-
-getAppList();
