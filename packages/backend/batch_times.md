@@ -184,3 +184,12 @@
   - App ID: 57000
   - App ID: 256030
   - App ID: 257510
+
+
+## 8 `MongoDB Atlas: CONCURRENCY_LIMIT = 10; ALWAYS update`
+- Total Fetch Time: 8145860.509033203 ms
+- Total Fetch Time: 2:15:45.861 (h:mm:ss.mmm)
+
+## 9 `MongoDB Atlas: CONCURRENCY_LIMIT = 10; CONDITIONAL update`
+- Total Fetch Time: 11653633.273925781 ms
+- Total Fetch Time: 3:14:13.633 (h:mm:ss.mmm)
