@@ -87,4 +87,5 @@ export async function populatePlayerCount(numberOfTopGames = null) {
         console.log('Fetched all player counts');
     }
     mongoose.disconnect();
+    console.log('MongoDB disconnected');
 }
