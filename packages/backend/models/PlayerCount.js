@@ -18,16 +18,27 @@ const playerCountSchema = new Schema(
             default: 0
         },
         peak24hr: {
-            type: Number,
-            default: 0
+            value: {
+                type: Number,
+                default: 0
+            },
+            timestamp: {
+                type: Date
+            }
         },
         peakAllTime: {
-            type: Number,
-            default: 0
-        }
+            value: {
+                type: Number,
+                default: 0
+            },
+            timestamp: {
+                type: Date
+            }
+        },
     },
     { collection: 'playercounts' }
 );
+
 
 playerCountSchema.index({ appid: 1 }); 
 

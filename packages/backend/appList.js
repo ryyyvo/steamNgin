@@ -103,14 +103,14 @@ async function saveDataToMongo(apps) {
 
             if (!name) {
                 console.warn(`Missing name for app: ${JSON.stringify(app)}`);
-                continue; // Skip this app if data is incomplete
+                continue;
             }
 
             const existingApp = await PlayerCount.findOne({ appid });
 
             if (existingApp) {
                 console.log(`Appid:${appid} is already in the collection`);
-                return; // Exit the function early if the app is already in the collection
+                return;
             }
 
             const newApp = new PlayerCount({

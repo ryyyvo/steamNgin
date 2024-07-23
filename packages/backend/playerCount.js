@@ -25,8 +25,20 @@ async function fetchPlayerCount(app) {
             const data = await response.json();
             const playerCount = data.response.player_count;
             if (playerCount !== undefined) {
-                await PlayerCount.updateOne({ appid: app.appid }, { $set: {playerCount} });
-                console.log(`Updated player count for App ID:${app.appid}`);
+                const now = new Date();
+                await PlayerCount.updateOne(
+                    { appid: app.appid },
+                    {
+                        $set: {
+                            playerCount: playerCount,
+                            'peak24hr.value': Math.max(playerCount, app.peak24hr?.value || 0),
+                            'peak24hr.timestamp': now,
+                            'peakAllTime.value': Math.max(playerCount, app.peakAllTime?.value || 0),
+                            'peakAllTime.timestamp': now
+                        }
+                    }
+                );
+                console.log(`Updated player count and peaks for App ID:${app.appid}`);
             }
             return; // Return the app if successful
         } catch (error) {
@@ -50,7 +62,7 @@ export async function populatePlayerCount(numberOfTopGames = null) {
 
     console.time('Total Fetch Time'); // Start timing
 
-    let query = PlayerCount.find({}, 'appid -_id').lean();
+    let query = PlayerCount.find({}, 'appid peak24hr peakAllTime -_id').lean();
 
     if (numberOfTopGames !== null) {
         query = query.sort({ playerCount: -1 }).limit(numberOfTopGames);
@@ -69,7 +81,7 @@ export async function populatePlayerCount(numberOfTopGames = null) {
 
     console.timeEnd('Total Fetch Time'); // End timing
     if (numberOfTopGames !== null) {
-        console.log(`Fetched the top ${numberOfTopGames} games' player count`)
+        console.log(`Fetched the top ${numberOfTopGames} games' player count`);
     }
     else {
         console.log('Fetched all player counts');

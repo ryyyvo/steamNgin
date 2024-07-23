@@ -1,5 +1,5 @@
-import { populatePlayerCount } from "./player_count.js";
-import { getAppList } from "./app_list.js";
+import { populatePlayerCount } from "./playerCount.js";
+import { getAppList } from "./appList.js";
 import schedule from "node-schedule";
 
 async function runTasks() {
@@ -27,7 +27,7 @@ async function runTasks() {
 			refreshTopGamesRunning = true;
 			try {
 				console.log('Refreshing the top 5000 games');
-				await populatePlayerCount(100); // Assuming 5000 is the number of top games
+				await populatePlayerCount(5000); // Assuming 5000 is the number of top games
 			} catch (err) {
 				console.error(err);
 			} finally {
