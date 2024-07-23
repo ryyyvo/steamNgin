@@ -9,23 +9,25 @@ const playerCountHistorySchema = new Schema(
             ref: 'PlayerCount',
             required: true
         },
-        playerCounts: [
+        history: [
             {
-                value: {
-                    type: Number,
-                    required: true
-                },
-                timestamp: {
-                    type: Date,
-                    required: true
+                playerCount: {
+                    value: {
+                        type: Number,
+                        required: true
+                    },
+                    timestamp: {
+                        type: Date,
+                        required: true
+                    }
                 }
             }
         ]
     },
-    { collection: 'playercounthistory' }
+    { collection: 'playercounthistories' }
 );
 
-playerCountHistorySchema.index({ 'playerCounts.timestamp': 1 });
+playerCountHistorySchema.index({ 'history.playerCount.timestamp': 1 });
 
 const PlayerCountHistory = mongoose.model("PlayerCountHistory", playerCountHistorySchema);
 
