@@ -1,25 +1,24 @@
 {
-  "name": "index",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx nodemon index.js",
-    "start": "node index.js"
+    "dev": "npx nodemon server.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/mongodb": "^8.0.0",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
     "mongodb": "^6.8.0",
     "mongoose": "^8.5.1",
-    "node-fetch": "^3.3.2",
     "node-schedule": "^2.1.1",
-    "p-limit": "^6.1.0",
-    "steam-totp": "^2.1.2",
-    "steam-user": "^5.0.10"
+    "p-limit": "^6.1.0"
   }
 }
