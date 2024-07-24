@@ -9,8 +9,7 @@ const MONGO_URI = process.env.MONGO_URI;
 const CONCURRENCY_LIMIT = 25; 
 const RETRY_LIMIT = 3; // Number of retries
 const TIMEOUT_MS = 10000; // Timeout for fetch requests in milliseconds
-
-export const limit = pLimit(CONCURRENCY_LIMIT);
+const limit = pLimit(CONCURRENCY_LIMIT);
 
 async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -28,9 +27,14 @@ async function fetchPlayerCount(app) {
                 return {
                     appid: app.appid,
                     playerCount,
-                    peak24hr: Math.max(playerCount, app.peak24hr?.value || 0),
-                    peakAllTime: Math.max(playerCount, app.peakAllTime?.value || 0),
-                    timestamp: now
+                    peak24hr: {
+                        value: Math.max(playerCount, app.peak24hr?.value || 0),
+                        timestamp: playerCount > (app.peak24hr?.value || 0) ? now : app.peak24hr?.timestamp
+                    },
+                    peakAllTime: {
+                        value: Math.max(playerCount, app.peakAllTime?.value || 0),
+                        timestamp: playerCount > (app.peakAllTime?.value || 0) ? now : app.peakAllTime?.timestamp
+                    }
                 };
             }
             return null;
@@ -71,10 +75,8 @@ export async function populatePlayerCount(numberOfTopGames = null) {
                             update: {
                                 $set: {
                                     playerCount: result.playerCount,
-                                    'peak24hr.value': result.peak24hr,
-                                    'peak24hr.timestamp': result.timestamp,
-                                    'peakAllTime.value': result.peakAllTime,
-                                    'peakAllTime.timestamp': result.timestamp
+                                    peak24hr: result.peak24hr,
+                                    peakAllTime: result.peakAllTime
                                 }
                             }
                         }
@@ -101,5 +103,3 @@ export async function populatePlayerCount(numberOfTopGames = null) {
     mongoose.disconnect();
     console.log('MongoDB disconnected');
 }
-
-populatePlayerCount(1000)
