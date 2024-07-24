@@ -1,13 +1,12 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import fetch from "node-fetch";
 import pLimit from 'p-limit';
 import PlayerCount from './models/PlayerCount.js';
 
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI;
-const CONCURRENCY_LIMIT = 10; 
+const CONCURRENCY_LIMIT = 25; 
 const RETRY_LIMIT = 3; // Number of retries
 const TIMEOUT_MS = 10000; // Timeout for fetch requests in milliseconds
 
@@ -20,72 +19,87 @@ async function delay(ms) {
 async function fetchPlayerCount(app) {
     for (let attempt = 0; attempt < RETRY_LIMIT; attempt++) {
         try {
-            const response = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`, 
+            const body = await fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${app.appid}`, 
                 { signal: AbortSignal.timeout(TIMEOUT_MS) });
-            const data = await response.json();
+            const data = await body.json();
             const playerCount = data.response.player_count;
             if (playerCount !== undefined) {
                 const now = new Date();
-                await PlayerCount.updateOne(
-                    { appid: app.appid },
-                    {
-                        $set: {
-                            playerCount: playerCount,
-                            'peak24hr.value': Math.max(playerCount, app.peak24hr?.value || 0),
-                            'peak24hr.timestamp': now,
-                            'peakAllTime.value': Math.max(playerCount, app.peakAllTime?.value || 0),
-                            'peakAllTime.timestamp': now
-                        }
-                    }
-                );
-                console.log(`Updated player count and peaks for App ID:${app.appid}`);
+                return {
+                    appid: app.appid,
+                    playerCount,
+                    peak24hr: Math.max(playerCount, app.peak24hr?.value || 0),
+                    peakAllTime: Math.max(playerCount, app.peakAllTime?.value || 0),
+                    timestamp: now
+                };
             }
-            return; // Return the app if successful
+            return null;
         } catch (error) {
             console.warn(`Attempt ${attempt + 1} failed for App ID:${app.appid}: ${error.message}`);
             if (attempt < RETRY_LIMIT - 1) {
-                await delay(1000); // Wait 1 second before retrying
+                await delay(Math.pow(2, attempt) * 1000); // Exponential backoff
             }
         }
     }
     console.error(`Could not retrieve App ID:${app.appid}'s player count after ${RETRY_LIMIT} attempts`);
+    return null;
 }
 
 export async function populatePlayerCount(numberOfTopGames = null) {
-    try {
-        await mongoose.connect(MONGO_URI);
-        console.log('MongoDB connected');
-    } catch (err) {
-        console.error('Error connecting to MongoDB:', err.message);
-        process.exit(1);
-    }
+    await mongoose.connect(MONGO_URI);
+    console.log('MongoDB connected');
 
-    console.time('Total Fetch Time'); // Start timing
+    console.time('Total Fetch Time');
 
     let query = PlayerCount.find({}, 'appid peak24hr peakAllTime -_id').lean();
-
     if (numberOfTopGames !== null) {
         query = query.sort({ playerCount: -1 }).limit(numberOfTopGames);
     }
-    
+   
     const apps = await query;
+    const bulkOps = [];
 
     for (let i = 0; i < apps.length; i += CONCURRENCY_LIMIT) {
         const batch = apps.slice(i, i + CONCURRENCY_LIMIT);
         try {
-            await Promise.all(batch.map(app => limit(() => fetchPlayerCount(app))));
+            const results = await Promise.all(batch.map(app => limit(() => fetchPlayerCount(app))));
+            results.forEach(result => {
+                if (result) {
+                    bulkOps.push({
+                        updateOne: {
+                            filter: { appid: result.appid },
+                            update: {
+                                $set: {
+                                    playerCount: result.playerCount,
+                                    'peak24hr.value': result.peak24hr,
+                                    'peak24hr.timestamp': result.timestamp,
+                                    'peakAllTime.value': result.peakAllTime,
+                                    'peakAllTime.timestamp': result.timestamp
+                                }
+                            }
+                        }
+                    });
+                }
+            });
         } catch (error) {
             console.error(`Batch starting at index ${i} encountered an error: ${error}`);
         }
     }
 
-    console.timeEnd('Total Fetch Time'); // End timing
+    if (bulkOps.length > 0) {
+        await PlayerCount.bulkWrite(bulkOps);
+    }
+
+    console.timeEnd('Total Fetch Time');
+
     if (numberOfTopGames !== null) {
         console.log(`Fetched the top ${numberOfTopGames} games' player count`);
-    }
-    else {
+    } else {
         console.log('Fetched all player counts');
     }
+
     mongoose.disconnect();
     console.log('MongoDB disconnected');
 }
+
+populatePlayerCount(1000)
