@@ -3,3 +3,5 @@ node_modules/
 !.vscode/launch.json
 .env
 gameplan.md
+playerCount.json
+appList.json
