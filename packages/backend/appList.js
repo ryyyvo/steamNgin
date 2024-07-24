@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import fetch from "node-fetch";
 import PlayerCount from './models/PlayerCount.js';
 
 dotenv.config();
@@ -10,13 +9,8 @@ const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 const URL = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
 
 export async function getAppList() {
-    try {
-        await mongoose.connect(MONGO_URI);
-        console.log('MongoDB connected');
-    } catch (err) {
-        console.error('Error connecting to MongoDB:', err.message);
-        process.exit(1);
-    }
+    await mongoose.connect(MONGO_URI);
+    console.log('MongoDB connected');
     try {
         const response = await fetch(URL); 
     
