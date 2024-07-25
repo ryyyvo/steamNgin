@@ -1,9 +1,9 @@
 import Fastify from 'fastify'
 import mongoose from 'mongoose';
 import cors from '@fastify/cors';
-import fastifyMongodb from '@fastify/mongodb';
 import dotenv from 'dotenv';
 import PlayerCount from './models/PlayerCount.js';
+import { startPlayerCountRefresh } from './refreshPlayerCount.js';
 
 dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
@@ -20,9 +20,6 @@ await fastify.register(cors, {
   // If you want to restrict it to specific origins:
   // origin: ['http://localhost:5173', 'https://yourdomain.com']
 });
-
-// Connect to MongoDB
-mongoose.connect(MONGO_URI);
 
 // Declare a route
 fastify.get('/', async (request, reply) => {
@@ -73,11 +70,16 @@ fastify.get('/api/playercounts/:appid', async (request, reply) => {
 // Start the server
 const start = async () => {
   try {
+    // Connect to MongoDB
+    await mongoose.connect(MONGO_URI);
+    console.log(`Connected to MongoDB`);
     await fastify.listen({ port: PORT });
     console.log('Server is running on http://localhost:3000');
+    startPlayerCountRefresh();
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 };
+
 start();
