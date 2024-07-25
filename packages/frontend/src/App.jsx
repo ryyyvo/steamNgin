@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Paper, CircularProgress, IconButton } from '@mui/material';
+import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Paper, CircularProgress, IconButton, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
@@ -60,12 +60,61 @@ function App() {
     return [...playerCounts].sort(comparator);
   }, [playerCounts, order, orderBy]);
 
-  const handlePreviousPage = () => {
-    setPage((prevPage) => Math.max(prevPage - 1, 1));
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
   };
 
-  const handleNextPage = () => {
-    setPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const ellipsis = <span key="ellipsis">...</span>;
+    
+    pageNumbers.push(
+      <Button key={1} onClick={() => handlePageChange(1)} disabled={page === 1}>
+        1
+      </Button>
+    );
+
+    if (page > 3) {
+      pageNumbers.push(ellipsis);
+    }
+
+    if (page > 2) {
+      pageNumbers.push(
+        <Button key={page - 1} onClick={() => handlePageChange(page - 1)}>
+          {page - 1}
+        </Button>
+      );
+    }
+
+    if (page !== 1 && page !== totalPages) {
+      pageNumbers.push(
+        <Button key={page} disabled>
+          {page}
+        </Button>
+      );
+    }
+
+    if (page < totalPages - 1) {
+      pageNumbers.push(
+        <Button key={page + 1} onClick={() => handlePageChange(page + 1)}>
+          {page + 1}
+        </Button>
+      );
+    }
+
+    if (page < totalPages - 2) {
+      pageNumbers.push(ellipsis);
+    }
+
+    if (totalPages > 1) {
+      pageNumbers.push(
+        <Button key={totalPages} onClick={() => handlePageChange(totalPages)} disabled={page === totalPages}>
+          {totalPages}
+        </Button>
+      );
+    }
+
+    return pageNumbers;
   };
 
   if (loading) {
@@ -79,7 +128,7 @@ function App() {
   return (
     <Container className="container">
       <Typography variant="h4" component="h1" gutterBottom>
-        steamNgin
+        Steam Player Counts
       </Typography>
       {playerCounts.length === 0 ? (
         <Typography className="no-data-message">No data available</Typography>
@@ -144,13 +193,11 @@ function App() {
             </Table>
           </TableContainer>
           <div className="pagination-controls">
-            <IconButton onClick={handlePreviousPage} disabled={page === 1}>
+            <IconButton onClick={() => handlePageChange(page - 1)} disabled={page === 1}>
               <ArrowBackIcon />
             </IconButton>
-            <Typography>
-              Page {page} of {totalPages}
-            </Typography>
-            <IconButton onClick={handleNextPage} disabled={page === totalPages}>
+            {getPageNumbers()}
+            <IconButton onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>
               <ArrowForwardIcon />
             </IconButton>
           </div>

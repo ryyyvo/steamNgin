@@ -107,16 +107,28 @@ h1 {
   width: 40%;
 }
 
+
 /* Pagination controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  flex-wrap: wrap;
 }
 
-.pagination-controls .MuiTypography-root {
-  margin: 0 10px;
+.pagination-controls .MuiButton-root {
+  min-width: 40px;
+  margin: 0 4px;
+  color: var(--text-color);
+}
+
+.pagination-controls .MuiButton-root:hover {
+  background-color: rgba(102, 192, 244, 0.1);
+}
+
+.pagination-controls .MuiButton-root.Mui-disabled {
+  color: var(--border-color);
 }
 
 .pagination-controls .MuiIconButton-root {
@@ -129,6 +141,11 @@ h1 {
 
 .pagination-controls .MuiIconButton-root.Mui-disabled {
   color: var(--border-color);
+}
+
+.pagination-controls span {
+  color: var(--text-color);
+  margin: 0 8px;
 }
 
 
