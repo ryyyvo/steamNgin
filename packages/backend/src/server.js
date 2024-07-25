@@ -33,9 +33,24 @@ fastify.get('/', async (request, reply) => {
 // Route to get all player counts
 fastify.get('/api/playercounts', async (request, reply) => {
   try {
-    const playerCounts = await PlayerCount.find().sort({ playerCount: -1 }).limit(100);
-    return playerCounts;
+    const page = parseInt(request.query.page) || 1;
+    const limit = parseInt(request.query.limit) || 100;
+    const skip = (page - 1) * limit;
+
+    const playerCounts = await PlayerCount.find()
+      .sort({ playerCount: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await PlayerCount.countDocuments();
+
+    return {
+      playerCounts,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page
+    };
   } catch (error) {
+    console.error('Error fetching player counts:', error);
     reply.code(500).send({ error: 'Internal Server Error' });
   }
 });

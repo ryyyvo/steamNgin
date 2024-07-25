@@ -24,13 +24,20 @@ async function fetchPlayerCount(app) {
             const playerCount = data.response.player_count;
             if (playerCount !== undefined) {
                 const now = new Date();
+                const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000);
+                // Check if the existing peak24hr is within the last 24 hours
+                const existingPeak24hrIsValid = app.peak24hr?.timestamp && new Date(app.peak24hr.timestamp) > twentyFourHoursAgo;
+                // Determine the new peak24hr
+                let newPeak24hr;
+                if (!existingPeak24hrIsValid || playerCount > app.peak24hr?.value) {
+                    newPeak24hr = { value: playerCount, timestamp: now };
+                } else {
+                    newPeak24hr = app.peak24hr;
+                }
                 return {
                     appid: app.appid,
                     playerCount,
-                    peak24hr: {
-                        value: Math.max(playerCount, app.peak24hr?.value || 0),
-                        timestamp: playerCount > (app.peak24hr?.value || 0) ? now : app.peak24hr?.timestamp
-                    },
+                    peak24hr: newPeak24hr,
                     peakAllTime: {
                         value: Math.max(playerCount, app.peakAllTime?.value || 0),
                         timestamp: playerCount > (app.peakAllTime?.value || 0) ? now : app.peakAllTime?.timestamp

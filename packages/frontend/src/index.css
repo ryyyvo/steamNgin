@@ -63,6 +63,92 @@ h1 {
   color: var(--header-color) !important;
 }
 
+/* Styles for sortable headers */
+.MuiTableSortLabel-root {
+  color: var(--header-color) !important;
+}
+
+.MuiTableSortLabel-root:hover {
+  color: var(--hover-color) !important;
+  text-decoration: underline;
+}
+
+.MuiTableSortLabel-root.Mui-active {
+  color: var(--hover-color) !important;
+}
+
+.MuiTableSortLabel-icon {
+  color: var(--hover-color) !important;
+}
+
+/* Styles for # column */
+.MuiTableCell-root:first-child {
+  color: var(--header-color) !important;
+  font-weight: bold !important;
+  width: 40px;
+  text-align: center;
+  padding-right: 0 !important;
+}
+
+/* Styles for Game column */
+.MuiTableCell-root:nth-child(2) {
+  padding-left: 8px !important;
+}
+
+/* Ensure other cells don't shrink too much */
+.MuiTableCell-root {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Make the game name cell take up more space */
+.MuiTableCell-root:nth-child(2) {
+  width: 40%;
+}
+
+
+/* Pagination controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls .MuiButton-root {
+  min-width: 40px;
+  margin: 0 4px;
+  color: var(--text-color);
+}
+
+.pagination-controls .MuiButton-root:hover {
+  background-color: rgba(102, 192, 244, 0.1);
+}
+
+.pagination-controls .MuiButton-root.Mui-disabled {
+  color: var(--border-color);
+}
+
+.pagination-controls .MuiIconButton-root {
+  color: var(--text-color);
+}
+
+.pagination-controls .MuiIconButton-root:hover {
+  background-color: rgba(102, 192, 244, 0.1);
+}
+
+.pagination-controls .MuiIconButton-root.Mui-disabled {
+  color: var(--border-color);
+}
+
+.pagination-controls span {
+  color: var(--text-color);
+  margin: 0 8px;
+}
+
+
 .no-data-message {
   text-align: center;
   font-size: 18px;
