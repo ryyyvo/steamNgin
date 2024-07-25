@@ -107,6 +107,30 @@ h1 {
   width: 40%;
 }
 
+/* Pagination controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-controls .MuiTypography-root {
+  margin: 0 10px;
+}
+
+.pagination-controls .MuiIconButton-root {
+  color: var(--text-color);
+}
+
+.pagination-controls .MuiIconButton-root:hover {
+  background-color: rgba(102, 192, 244, 0.1);
+}
+
+.pagination-controls .MuiIconButton-root.Mui-disabled {
+  color: var(--border-color);
+}
+
 
 .no-data-message {
   text-align: center;

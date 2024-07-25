@@ -1,6 +1,8 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Paper, CircularProgress } from '@mui/material';
+import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Paper, CircularProgress, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const API_BASE_URL = 'http://localhost:3000'; // Update this if your backend is hosted elsewhere
 
@@ -9,13 +11,17 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState('desc');
   const [orderBy, setOrderBy] = useState('playerCount');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchPlayerCounts = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/playercounts`);
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/playercounts?page=${page}&limit=100`);
         const data = await response.json();
-        setPlayerCounts(data);
+        setPlayerCounts(data.playerCounts);
+        setTotalPages(data.totalPages);
       } catch (error) {
         console.error('Error fetching player counts:', error);
       } finally {
@@ -24,7 +30,7 @@ function App() {
     };
 
     fetchPlayerCounts();
-  }, []);
+  }, [page]);
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -54,6 +60,14 @@ function App() {
     return [...playerCounts].sort(comparator);
   }, [playerCounts, order, orderBy]);
 
+  const handlePreviousPage = () => {
+    setPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
   if (loading) {
     return (
       <Container className="container">
@@ -70,64 +84,77 @@ function App() {
       {playerCounts.length === 0 ? (
         <Typography className="no-data-message">No data available</Typography>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>#</TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === 'name'}
-                    direction={orderBy === 'name' ? order : 'asc'}
-                    onClick={() => handleRequestSort('name')}
-                  >
-                    Game
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right">
-                  <TableSortLabel
-                    active={orderBy === 'playerCount'}
-                    direction={orderBy === 'playerCount' ? order : 'asc'}
-                    onClick={() => handleRequestSort('playerCount')}
-                  >
-                    Current Players
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right">
-                  <TableSortLabel
-                    active={orderBy === 'peak24hr'}
-                    direction={orderBy === 'peak24hr' ? order : 'asc'}
-                    onClick={() => handleRequestSort('peak24hr')}
-                  >
-                    24-Hour Peak
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right">
-                  <TableSortLabel
-                    active={orderBy === 'peakAllTime'}
-                    direction={orderBy === 'peakAllTime' ? order : 'asc'}
-                    onClick={() => handleRequestSort('peakAllTime')}
-                  >
-                    All-Time Peak
-                  </TableSortLabel>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedPlayerCounts.map((game, index) => (
-                <TableRow key={game.appid}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell component="th" scope="row">
-                    {game.name}
+        <>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === 'name'}
+                      direction={orderBy === 'name' ? order : 'asc'}
+                      onClick={() => handleRequestSort('name')}
+                    >
+                      Game
+                    </TableSortLabel>
                   </TableCell>
-                  <TableCell align="right">{game.playerCount.toLocaleString()}</TableCell>
-                  <TableCell align="right">{game.peak24hr?.value.toLocaleString()}</TableCell>
-                  <TableCell align="right">{game.peakAllTime?.value.toLocaleString()}</TableCell>
+                  <TableCell align="right">
+                    <TableSortLabel
+                      active={orderBy === 'playerCount'}
+                      direction={orderBy === 'playerCount' ? order : 'asc'}
+                      onClick={() => handleRequestSort('playerCount')}
+                    >
+                      Current Players
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right">
+                    <TableSortLabel
+                      active={orderBy === 'peak24hr'}
+                      direction={orderBy === 'peak24hr' ? order : 'asc'}
+                      onClick={() => handleRequestSort('peak24hr')}
+                    >
+                      24-Hour Peak
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right">
+                    <TableSortLabel
+                      active={orderBy === 'peakAllTime'}
+                      direction={orderBy === 'peakAllTime' ? order : 'asc'}
+                      onClick={() => handleRequestSort('peakAllTime')}
+                    >
+                      All-Time Peak
+                    </TableSortLabel>
+                  </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {sortedPlayerCounts.map((game, index) => (
+                  <TableRow key={game.appid}>
+                    <TableCell>{(page - 1) * 100 + index + 1}</TableCell>
+                    <TableCell component="th" scope="row">
+                      {game.name}
+                    </TableCell>
+                    <TableCell align="right">{game.playerCount.toLocaleString()}</TableCell>
+                    <TableCell align="right">{game.peak24hr?.value.toLocaleString()}</TableCell>
+                    <TableCell align="right">{game.peakAllTime?.value.toLocaleString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <div className="pagination-controls">
+            <IconButton onClick={handlePreviousPage} disabled={page === 1}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography>
+              Page {page} of {totalPages}
+            </Typography>
+            <IconButton onClick={handleNextPage} disabled={page === totalPages}>
+              <ArrowForwardIcon />
+            </IconButton>
+          </div>
+        </>
       )}
     </Container>
   );
