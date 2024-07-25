@@ -27,7 +27,7 @@ async function runTasks() {
 			refreshTopGamesRunning = true;
 			try {
 				console.log('Refreshing the top 5000 games');
-				await populatePlayerCount(5000); // Assuming 5000 is the number of top games
+				await populatePlayerCount(1000); // Assuming 5000 is the number of top games
 			} catch (err) {
 				console.error(err);
 			} finally {
