@@ -12,7 +12,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/packages/backend/player_count.js",
+            "program": "${workspaceFolder}/packages/backend/src/refreshPlayerCount.js",
             "envFile": "${workspaceFolder}/packages/backend/.env"
 
         }
