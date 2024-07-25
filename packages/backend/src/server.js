@@ -31,16 +31,6 @@ fastify.get('/', async (request, reply) => {
 
 
 // Route to get all player counts
-
-// fastify.get('/api/playercounts', async (request, reply) => {
-//   try {
-//     const playerCounts = await PlayerCount.find().sort({ playerCount: -1 }).limit(100);
-//     return playerCounts;
-//   } catch (error) {
-//     reply.code(500).send({ error: 'Internal Server Error' });
-//   }
-// });
-
 fastify.get('/api/playercounts', async (request, reply) => {
   try {
     const page = parseInt(request.query.page) || 1;
