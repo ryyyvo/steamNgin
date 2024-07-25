@@ -5,7 +5,7 @@ import { TableCell, TableRow as MuiTableRow } from '@mui/material';
 function TableRow({ game, index }) {
   return (
     <MuiTableRow>
-      <TableCell>{index}</TableCell>
+      <TableCell>{index}.</TableCell>
       <TableCell component="th" scope="row">
         {game.name}
       </TableCell>

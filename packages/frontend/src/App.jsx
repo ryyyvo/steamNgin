@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Typography, CircularProgress } from '@mui/material';
 import PlayerCountTable from './components/PlayerCountTable.jsx';
 import Pagination from './components/Pagination.jsx';
@@ -45,7 +45,7 @@ function App() {
   return (
     <Container className="container">
       <Typography variant="h4" component="h1" gutterBottom>
-        Steam Player Counts
+        steamNgin
       </Typography>
       {playerCounts.length === 0 ? (
         <Typography className="no-data-message">No data available</Typography>
