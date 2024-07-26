@@ -14,6 +14,9 @@ deciding how to go about refreshing player count and the batch size.
 creating the schema and how I should store the data 
 # 7 
 changing storing data from local json to mongodb and adjust the code accordingly 
+# 8 
+running background scripts on the server and not closing out mongodb connection with in the script.
+close it out on the highest level function.
 
 
 

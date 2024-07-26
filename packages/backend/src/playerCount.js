@@ -1,11 +1,9 @@
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import pLimit from 'p-limit';
 import PlayerCount from './models/PlayerCount.js';
 
 dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
-const MONGO_URI = process.env.MONGO_URI;
 const CONCURRENCY_LIMIT = 25; 
 const RETRY_LIMIT = 3; // Number of retries
 const TIMEOUT_MS = 10000; // Timeout for fetch requests in milliseconds
@@ -57,9 +55,6 @@ async function fetchPlayerCount(app) {
 }
 
 export async function populatePlayerCount(numberOfTopGames = null) {
-    await mongoose.connect(MONGO_URI);
-    console.log('MongoDB connected');
-
     console.time('Total Fetch Time');
 
     let query = PlayerCount.find({}, 'appid peak24hr peakAllTime -_id').lean();
@@ -106,7 +101,4 @@ export async function populatePlayerCount(numberOfTopGames = null) {
     } else {
         console.log('Fetched all player counts');
     }
-
-    mongoose.disconnect();
-    console.log('MongoDB disconnected');
 }
