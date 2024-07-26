@@ -1,14 +1,10 @@
 import Fastify from 'fastify'
 import mongoose from 'mongoose';
 import cors from '@fastify/cors';
-import fastifyMongodb from '@fastify/mongodb';
 import dotenv from 'dotenv';
 import PlayerCount from './models/PlayerCount.js';
 
 dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
-
-const PORT = 3000
-const MONGO_URI = process.env.MONGO_URI;
 
 const fastify = Fastify({
   logger: true
@@ -20,9 +16,6 @@ await fastify.register(cors, {
   // If you want to restrict it to specific origins:
   // origin: ['http://localhost:5173', 'https://yourdomain.com']
 });
-
-// Connect to MongoDB
-mongoose.connect(MONGO_URI);
 
 // Declare a route
 fastify.get('/', async (request, reply) => {
@@ -50,8 +43,8 @@ fastify.get('/api/playercounts', async (request, reply) => {
       currentPage: page
     };
   } catch (error) {
-    console.error('Error fetching player counts:', error);
-    reply.code(500).send({ error: 'Internal Server Error' });
+      console.error('Error fetching player counts:', error);
+      reply.code(500).send({ error: 'Internal Server Error' });
   }
 });
 
@@ -73,6 +66,10 @@ fastify.get('/api/playercounts/:appid', async (request, reply) => {
 // Start the server
 const start = async () => {
   try {
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log(`Connected to MongoDB`);
+    const PORT = process.env.PORT;
     await fastify.listen({ port: PORT });
     console.log('Server is running on http://localhost:3000');
   } catch (err) {
@@ -80,4 +77,5 @@ const start = async () => {
     process.exit(1);
   }
 };
+
 start();

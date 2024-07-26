@@ -4,7 +4,8 @@ import { Container, Typography, CircularProgress } from '@mui/material';
 import PlayerCountTable from './components/PlayerCountTable.jsx';
 import Pagination from './components/Pagination.jsx';
 
-const API_BASE_URL = 'http://localhost:3000'; // Update this if your backend is hosted elsewhere
+const API_URL = import.meta.env.VITE_API_URL; 
+console.log(`api url:${API_URL}`);
 
 function App() {
   const [playerCounts, setPlayerCounts] = useState([]);
@@ -16,7 +17,7 @@ function App() {
     const fetchPlayerCounts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/playercounts?page=${page}&limit=100`);
+        const response = await fetch(`${API_URL}/api/playercounts?page=${page}&limit=100`);
         const data = await response.json();
         setPlayerCounts(data.playerCounts);
         setTotalPages(data.totalPages);
