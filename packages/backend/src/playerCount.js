@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import pLimit from 'p-limit';
 import PlayerCount from './models/PlayerCount.js';
 
-dotenv.config({path: '../.env'});
+dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
 const MONGO_URI = process.env.MONGO_URI;
 const CONCURRENCY_LIMIT = 25; 
