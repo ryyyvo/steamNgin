@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import PlayerCount from './models/PlayerCount.js';
+import { startPlayerCountRefresh } from './refreshPlayerCount.js';
 
 dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
@@ -72,6 +73,7 @@ const start = async () => {
     const PORT = process.env.PORT;
     await fastify.listen({ port: PORT });
     console.log('Server is running on http://localhost:3000');
+    startPlayerCountRefresh();
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
@@ -79,3 +81,10 @@ const start = async () => {
 };
 
 start();
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  await mongoose.disconnect();
+  console.log('\nMongoDB disconnected through app termination');
+  process.exit(0);
+});
