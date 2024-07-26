@@ -71,7 +71,7 @@ const start = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log(`Connected to MongoDB`);
     const PORT = process.env.PORT;
-    await fastify.listen({ port: PORT });
+    await fastify.listen({ port: PORT, host: '0.0.0.0' });
     console.log('Server is running on http://localhost:3000');
     startPlayerCountRefresh();
   } catch (err) {
