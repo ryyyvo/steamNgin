@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -9,17 +8,8 @@ const connectDB = async () => {
     console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    process.exit(1);
+    setTimeout(connectDB, 5000);
   }
 };
-
-mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected. Attempting to reconnect...');
-  connectDB();
-});
-
-mongoose.connection.on('error', (error) => {
-  console.error('MongoDB connection error:', error);
-});
 
 export default connectDB;
