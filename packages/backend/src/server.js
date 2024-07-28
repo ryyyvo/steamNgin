@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import mongoose from 'mongoose';
 import cors from '@fastify/cors';
 import dotenv from 'dotenv';
+import connectDB from './db.js';
 import PlayerCount from './models/PlayerCount.js';
 import { startPlayerCountRefresh } from './refreshPlayerCount.js';
 
@@ -10,6 +11,8 @@ dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 const fastify = Fastify({
   logger: true
 })
+
+connectDB();
 
 // Register CORS plugin
 await fastify.register(cors, {
@@ -68,9 +71,7 @@ fastify.get('/api/playercounts/:appid', async (request, reply) => {
 const start = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log(`Connected to MongoDB`);
-    const PORT = process.env.PORT;
+    const PORT = process.env.PORT || 10000;
     await fastify.listen({ port: PORT, host: '0.0.0.0' });
     console.log('Server is running on http://localhost:3000');
     startPlayerCountRefresh();
