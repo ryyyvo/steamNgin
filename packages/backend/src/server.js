@@ -13,7 +13,7 @@ const fastify = Fastify({
 })
 
 await fastify.register(cors, {
-  origin: true
+  origin: true // True for now, accessible from everywhere
 });
 
 fastify.register(routes);
