@@ -17,6 +17,8 @@ changing storing data from local json to mongodb and adjust the code accordingly
 # 8 
 running background scripts on the server and not closing out mongodb connection with in the script.
 close it out on the highest level function.
+# 9 
+separating routes from server file 
 
 
 
