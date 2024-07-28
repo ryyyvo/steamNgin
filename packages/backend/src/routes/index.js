@@ -5,5 +5,5 @@ export default async function routes(fastify, options) {
     return { steamNgin: '1' };
   });
 
-  fastify.register(playerCountRoutes, { prefix: '/api' });
+  await fastify.register(playerCountRoutes);
 }
