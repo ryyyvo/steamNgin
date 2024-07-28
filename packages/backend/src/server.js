@@ -12,20 +12,15 @@ const fastify = Fastify({
   logger: true
 })
 
-connectDB();
-
 // Register CORS plugin
 await fastify.register(cors, {
-  origin: true // Allow all origins
-  // If you want to restrict it to specific origins:
-  // origin: ['http://localhost:5173', 'https://yourdomain.com']
+  origin: true
 });
 
 // Declare a route
 fastify.get('/', async (request, reply) => {
   return { steamNgin: '1' }
 })
-
 
 // Route to get all player counts
 fastify.get('/api/playercounts', async (request, reply) => {
@@ -67,19 +62,41 @@ fastify.get('/api/playercounts/:appid', async (request, reply) => {
   }
 });
 
+// Set up MongoDB connection listeners
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connection established');
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Attempting to reconnect...');
+  connectDB();
+});
+
+mongoose.connection.on('error', (error) => {
+  console.error('MongoDB connection error:', error);
+});
+
 // Start the server
 const start = async () => {
   try {
     // Connect to MongoDB
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
     const PORT = process.env.PORT || 10000;
     await fastify.listen({ port: PORT, host: '0.0.0.0' });
-    console.log('Server is running on http://localhost:3000');
+    console.log(`Server is running on port ${PORT}`);
     startPlayerCountRefresh();
   } catch (err) {
     fastify.log.error(err);
-    process.exit(1);
+    console.log('Server start failed. Attempting to reconnect...');
+    setTimeout(start, 5000); // Attempt to restart after 5 seconds
   }
 };
+
+connectDB().catch(err => {
+  console.error('Initial MongoDB connection failed:', err);
+});
 
 start();
 
