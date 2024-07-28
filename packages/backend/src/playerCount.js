@@ -1,8 +1,5 @@
-import dotenv from 'dotenv';
 import pLimit from 'p-limit';
 import PlayerCount from './models/PlayerCount.js';
-
-dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
 const CONCURRENCY_LIMIT = 25; 
 const RETRY_LIMIT = 3; // Number of retries
