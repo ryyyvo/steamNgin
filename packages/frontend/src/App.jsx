@@ -5,7 +5,6 @@ import PlayerCountTable from './components/PlayerCountTable.jsx';
 import Pagination from './components/Pagination.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL; 
-console.log(`api url:${API_URL}`);
 
 function App() {
   const [playerCounts, setPlayerCounts] = useState([]);
