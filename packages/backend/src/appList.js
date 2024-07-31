@@ -9,8 +9,6 @@ const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
 const URL = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${SECRET_KEY}&include_games=true&include_dlc=false&include_software=true&include_videos=false&include_hardware=false&max_results=50000`
 
 export async function getAppList() {
-    await mongoose.connect(MONGO_URI);
-    console.log('MongoDB connected');
     try {
         const response = await fetch(URL); 
     
@@ -23,7 +21,7 @@ export async function getAppList() {
         console.time('Total Fetch Time'); // Start timing
         await saveDataToMongo(data.response.apps);
     
-        console.log('Initial data saved.');
+        console.log('Initial app list data saved.');
     
         if (data.response.have_more_results) {
             await getRemainingApps(data.response.last_appid);
@@ -33,7 +31,6 @@ export async function getAppList() {
         console.error('Error getting app list:', error);
     }
     console.timeEnd('Total Fetch Time'); // End timing
-    mongoose.disconnect();
 }
 
 async function getRemainingApps(lastAppId) {
