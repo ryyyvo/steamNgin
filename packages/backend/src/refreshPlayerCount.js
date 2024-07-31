@@ -25,14 +25,14 @@ async function releaseLock() {
   }
 }
 
-async function runDailyTasks() {
+async function getAllGames() {
   console.log('Getting app list');
   await getAppList();
   console.log('Populating player counts from new app list')
   await populatePlayerCount();
 }
 
-async function runFrequentTask() {
+async function getTopGames() {
   console.log('Getting the top 1000 player counts');
   await populatePlayerCount(1000);
 }
@@ -51,12 +51,12 @@ async function scheduledTask(task) {
 
 // Schedule daily tasks at 12 AM
 cron.schedule('0 0 * * *', () => {
-  scheduledTask(runDailyTasks);
+  scheduledTask(getAllGames);
 });
 
 // Schedule frequent task every 20 minutes
 cron.schedule('*/15 * * * *', () => {
-  scheduledTask(runFrequentTask);
+  scheduledTask(getTopGames);
 });
 
 console.log('Scheduler started');
