@@ -1,62 +1,62 @@
-// refreshPlayerCount.js
-import { populatePlayerCount } from "./playerCount.js";
-import { getAppList } from "./appList.js";
-import schedule from "node-schedule";
+import cron from 'node-cron';
+import { promises as fs } from 'fs';
+import { getAppList } from './appList.js';
+import { populatePlayerCount } from './playerCount.js';
 
-export function startPlayerCountRefresh() {
-    let populatePlayerCountRunning = false;
-    let refreshTopGamesRunning = false;
+const LOCK_FILE = 'scheduler.lock';
 
-    async function runGetPlayerCount() {
-        populatePlayerCountRunning = true;
-        try {
-            console.log('Running populatePlayerCount at 12 AM PST');
-            await getAppList();
-            await populatePlayerCount(); // You can adjust the numberOfTopGames parameter here if needed
-        } catch (err) {
-            console.error('Error in runGetPlayerCount:', err);
-        } finally {
-            populatePlayerCountRunning = false;
-            console.log('populatePlayerCount has finished');
-            scheduleRefreshTopGames(); // Schedule the next run of refreshTopGames
-        }
+async function acquireLock() {
+  try {
+    await fs.writeFile(LOCK_FILE, 'locked', { flag: 'wx' });
+    return true;
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      return false;
     }
-
-    async function scheduleRefreshTopGames() {
-        if (!populatePlayerCountRunning && !refreshTopGamesRunning) {
-            refreshTopGamesRunning = true;
-            try {
-                console.log('Refreshing the top 1000 games');
-                await populatePlayerCount(1000);
-            } catch (err) {
-                console.error('Error in scheduleRefreshTopGames:', err);
-            } finally {
-                refreshTopGamesRunning = false;
-                console.log('refreshTopGames has finished');
-                setTimeout(scheduleRefreshTopGames, 20 * 60 * 1000); // Schedule next run in 20 minutes
-            }
-        } else {
-            // If either task is running, reschedule after a short delay
-            setTimeout(scheduleRefreshTopGames, 60 * 1000); // Try again in 1 minute
-        }
-    }
-
-    // Schedule populatePlayerCount to run at 12 AM PST every day
-    schedule.scheduleJob('0 0 * * *', async () => {
-        if (refreshTopGamesRunning) {
-            console.log('Waiting for refreshTopGames to complete before running populatePlayerCount');
-            // Wait for refreshTopGames to complete before starting populatePlayerCount
-            const checkInterval = setInterval(() => {
-                if (!refreshTopGamesRunning) {
-                    clearInterval(checkInterval);
-                    runGetPlayerCount();
-                }
-            }, 10000); // Check every 10 seconds
-        } else {
-            runGetPlayerCount();
-        }
-    });
-
-    // Start running refreshTopGames immediately
-    scheduleRefreshTopGames();
+    throw error;
+  }
 }
+
+async function releaseLock() {
+  try {
+    await fs.unlink(LOCK_FILE);
+  } catch (error) {
+    console.error('Error releasing lock:', error);
+  }
+}
+
+async function runDailyTasks() {
+  console.log('Getting app list');
+  await getAppList();
+  console.log('Populating player counts from new app list')
+  await populatePlayerCount();
+}
+
+async function runFrequentTask() {
+  console.log('Getting the top 1000 player counts');
+  await populatePlayerCount(1000);
+}
+
+async function scheduledTask(task) {
+  if (await acquireLock()) {
+    try {
+      await task();
+    } finally {
+      await releaseLock();
+    }
+  } else {
+    console.log('Another task is running. Skipping this execution');
+  }
+}
+
+// Schedule daily tasks at 12 AM
+cron.schedule('0 0 * * *', () => {
+  scheduledTask(runDailyTasks);
+});
+
+// Schedule frequent task every 20 minutes
+cron.schedule('*/15 * * * *', () => {
+  scheduledTask(runFrequentTask);
+});
+
+console.log('Scheduler started');
