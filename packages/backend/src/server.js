@@ -4,7 +4,7 @@ import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import connectDB from './db.js';
 import routes from './routes/index.js';
-import { startPlayerCountRefresh } from './refreshPlayerCount.js';
+import { startScheduler } from './refreshPlayerCount.js';
 
 dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
@@ -39,7 +39,7 @@ const start = async () => {
     const PORT = process.env.PORT || 10000;
     await fastify.listen({ port: PORT, host: '0.0.0.0' });
     console.log(`Server is running on port ${PORT}`);
-    startPlayerCountRefresh();
+    startScheduler();
   } catch (err) {
     fastify.log.error(err);
     console.log('Server start failed. Attempting to restart...');
