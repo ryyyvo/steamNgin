@@ -68,7 +68,7 @@ async function scheduledTask(task, getAllGames = false) {
 
 export function startScheduler() {
   // Schedule daily tasks at 12 AM
-  cron.schedule('0 0 * * *', () => {
+  cron.schedule('47 1 * * *', () => {
     scheduledTask(getAllGames, true);
   });
 
