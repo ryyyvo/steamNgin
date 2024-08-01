@@ -54,12 +54,12 @@ async function scheduledTask(task, getAllGames = false) {
       if (getAllGames) {
         console.log('getAllGames waiting for lock...');
         if (Date.now() - startTime > MAX_RETRY_TIME) {
-          console.log('Failed to acquire lock for daily task after maximum retry time. Skipping this execution');
+          console.log('Failed to acquire lock for getAllGames after maximum retry time. Skipping this execution');
           return;
         }
         await new Promise(resolve => setTimeout(resolve, RETRY_INTERVAL));
       } else {
-        console.log('Frequent task found lock. Skipping this execution');
+        console.log('getTopGames found lock. Skipping this execution');
         return;
       }
     }
@@ -68,7 +68,7 @@ async function scheduledTask(task, getAllGames = false) {
 
 export function startScheduler() {
   // Schedule daily tasks at 12 AM
-  cron.schedule('50 1 * * *', () => {
+  cron.schedule('57 2 * * *', () => {
     scheduledTask(getAllGames, true);
   });
 
