@@ -40,7 +40,8 @@ const playerCountSchema = new Schema(
 );
 
 
-playerCountSchema.index({ appid: 1 }); 
+playerCountSchema.index({ appid: 1 }, { unique: true }); 
+playerCountSchema.index({ name: 'text' });
 
 const PlayerCount = mongoose.model("PlayerCount", playerCountSchema);
 
