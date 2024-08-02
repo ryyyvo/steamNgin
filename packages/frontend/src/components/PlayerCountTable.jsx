@@ -1,5 +1,5 @@
 // src/components/PlayerCountTable.jsx
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Table, TableBody, TableContainer, Paper } from '@mui/material';
 import TableHeader from './TableHeader.jsx';
 import TableRow from './TableRow.jsx';

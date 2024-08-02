@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Typography, CircularProgress, Box } from '@mui/material';
 import PlayerCountTable from './components/PlayerCountTable.jsx';
 import Pagination from './components/Pagination.jsx';
@@ -58,7 +58,7 @@ function App() {
         <>
           {searchQuery && (
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Showing top {playerCounts.length} out of {totalResults} matches for {searchQuery}
+              Showing top {playerCounts.length} out of {totalResults} matches for &quot;{searchQuery}&quot;
             </Typography>
           )}
           <PlayerCountTable playerCounts={playerCounts} page={page} />
