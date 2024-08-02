@@ -1,4 +1,3 @@
-// src/App.jsx
 import { useState, useEffect } from 'react';
 import { Container, Typography, CircularProgress, Box } from '@mui/material';
 import PlayerCountTable from './components/PlayerCountTable.jsx';

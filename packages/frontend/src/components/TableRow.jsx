@@ -1,4 +1,3 @@
-// src/components/TableRow.jsx
 import { TableCell, TableRow as MuiTableRow } from '@mui/material';
 
 function TableRow({ game, index }) {

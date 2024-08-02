@@ -1,5 +1,3 @@
-// src/components/Pagination.jsx
-import React from 'react';
 import { IconButton, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
