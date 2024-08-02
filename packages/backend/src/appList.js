@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import PlayerCount from './models/PlayerCount.js';
 
-dotenv.config({path: '../.env'});
+dotenv.config({path: '/home/ryanvo/code/steamNgin/packages/backend/.env'});
 
 const MONGO_URI = process.env.MONGO_URI;
 const SECRET_KEY = process.env.STEAM_WEB_API_SECRET_KEY;
