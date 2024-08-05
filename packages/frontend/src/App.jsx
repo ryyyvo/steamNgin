@@ -3,6 +3,7 @@ import { Container, Typography, CircularProgress, Box } from '@mui/material';
 import PlayerCountTable from './components/PlayerCountTable.jsx';
 import Pagination from './components/Pagination.jsx';
 import SearchBar from './components/SearchBar.jsx';
+import Footer from './components/Footer.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL; 
 
@@ -68,6 +69,7 @@ function App() {
           />
         </>
       )}
+      <Footer/>
     </Container>
   );
 }
