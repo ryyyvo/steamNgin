@@ -88,9 +88,14 @@ h1 {
   padding-right: 0 !important;
 }
 
-/* Styles for Game column */
+/* Styles for Image column */
 .MuiTableCell-root:nth-child(2) {
-  padding-left: 8px !important;
+  padding-left: 0.5rem !important;
+  width: 0px;
+}
+
+.MuiTableCell-root:nth-child(6) {
+  padding-right: 2rem !important;
 }
 
 /* Ensure other cells don't shrink too much */
@@ -99,12 +104,6 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Make the game name cell take up more space */
-.MuiTableCell-root:nth-child(2) {
-  width: 40%;
-}
-
 
 /* Pagination controls */
 .pagination-controls {
