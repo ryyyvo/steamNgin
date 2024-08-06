@@ -13,7 +13,7 @@ function TableHeader({ order, orderBy, onRequestSort }) {
         <TableCell>
           <TableSortLabel
             active={orderBy === 'name'}
-            direction={orderBy === 'name' ? order : 'asc'}
+            direction={orderBy === 'name' ? order : 'desc'}
             onClick={createSortHandler('name')}
           >
             Game
@@ -22,7 +22,7 @@ function TableHeader({ order, orderBy, onRequestSort }) {
         <TableCell align="right">
           <TableSortLabel
             active={orderBy === 'playerCount'}
-            direction={orderBy === 'playerCount' ? order : 'asc'}
+            direction={orderBy === 'playerCount' ? order : 'desc'}
             onClick={createSortHandler('playerCount')}
           >
             Current Players
@@ -31,7 +31,7 @@ function TableHeader({ order, orderBy, onRequestSort }) {
         <TableCell align="right">
           <TableSortLabel
             active={orderBy === 'peak24hr'}
-            direction={orderBy === 'peak24hr' ? order : 'asc'}
+            direction={orderBy === 'peak24hr' ? order : 'desc'}
             onClick={createSortHandler('peak24hr')}
           >
             24-Hour Peak
@@ -40,7 +40,7 @@ function TableHeader({ order, orderBy, onRequestSort }) {
         <TableCell align="right">
           <TableSortLabel
             active={orderBy === 'peakAllTime'}
-            direction={orderBy === 'peakAllTime' ? order : 'asc'}
+            direction={orderBy === 'peakAllTime' ? order : 'desc'}
             onClick={createSortHandler('peakAllTime')}
           >
             All-Time Peak

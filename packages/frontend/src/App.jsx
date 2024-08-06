@@ -47,8 +47,8 @@ function App() {
   }
 
   const handleRequestSort = (property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    const isDesc = orderBy === property && order === 'desc';
+    setOrder(isDesc ? 'asc' : 'desc');
     setOrderBy(property);
     setPage(1); // Reset to first page when sorting changes
   };
