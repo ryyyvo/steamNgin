@@ -9,6 +9,7 @@ function TableHeader({ order, orderBy, onRequestSort }) {
     <TableHead>
       <TableRow>
         <TableCell>#</TableCell>
+        <TableCell></TableCell>
         <TableCell>
           <TableSortLabel
             active={orderBy === 'name'}
