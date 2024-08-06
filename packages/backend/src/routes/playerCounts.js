@@ -5,16 +5,31 @@ export default async function playerCountRoutes(fastify, options) {
     try {
       const page = parseInt(request.query.page) || 1;
       const limit = parseInt(request.query.limit) || 100;
+      const sortField = request.query.sortField || 'playerCount';
+      const sortOrder = request.query.sortOrder === 'asc' ? 1 : -1;
       const skip = (page - 1) * limit;
+
+      let sort = {};
+      if (sortField === 'peak24hr') {
+        sort['peak24hr.value'] = sortOrder;
+      } else if (sortField === 'peakAllTime') {
+        sort['peakAllTime.value'] = sortOrder;
+      } else {
+        sort[sortField] = sortOrder;
+      }
+
       const playerCounts = await PlayerCount.find()
-        .sort({ playerCount: -1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit);
+
       const total = await PlayerCount.countDocuments();
+
       return {
         playerCounts,
         totalPages: Math.ceil(total / limit),
-        currentPage: page
+        currentPage: page,
+        total
       };
     } catch (error) {
       fastify.log.error('Error fetching player counts:', error);
