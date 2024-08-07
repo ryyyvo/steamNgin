@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { TableCell, TableRow as MuiTableRow } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { StyledLink } from '../styles/TableRow.styles';
 
 const GrayPlaceholder = () => (
   <svg width="120" height="45" xmlns="http://www.w3.org/2000/svg">
@@ -45,10 +47,14 @@ function TableRow({ game, index }) {
     <MuiTableRow>
       <TableCell>{index}.</TableCell>
       <TableCell>
-        <GameImage appId={game.appid} gameName={game.name} />
+        <Link to={`/app/${game.appid}`}>
+          <GameImage appId={game.appid} gameName={game.name} />
+        </Link>
       </TableCell>
       <TableCell component="th" scope="row">
-        {game.name}
+        <StyledLink to={`/app/${game.appid}`}>
+          {game.name}
+        </StyledLink>
       </TableCell>
       <TableCell align="right" sx={{ color: '#a3cf06 !important' }}>{game.playerCount.toLocaleString()}</TableCell>
       <TableCell align="right">{game.peak24hr?.value.toLocaleString()}</TableCell>
