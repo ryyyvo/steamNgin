@@ -1,3 +1,4 @@
+import appDetailsRoutes from './appDetails.js';
 import playerCountRoutes from './playerCounts.js';
 
 export default async function routes(fastify, options) {
@@ -6,4 +7,5 @@ export default async function routes(fastify, options) {
   });
 
   await fastify.register(playerCountRoutes);
+  await fastify.register(appDetailsRoutes);
 }
