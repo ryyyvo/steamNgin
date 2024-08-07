@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, CircularProgress, TableHead, TableBody, TableRow } from '@mui/material';
-import { StyledPaper, StyledTable, StyledTableCell, StyledTableCellHeader, StyledTableCellContent, StyledTableRow, HeaderImage, AppTitle } from '../styles/AppDetails.style';
+import { Typography, CircularProgress, TableBody, } from '@mui/material';
+import {   
+	StyledPaper, 
+  StyledTable, 
+  StyledTableCellHeader, 
+  StyledTableCellContent, 
+  StyledTableRow, 
+  HeaderImage, 
+  AppTitle  
+} from '../styles/AppDetails.style';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -33,13 +41,13 @@ function AppDetails() {
 	}
 
 	if (!appDetails) {
-		return <Typography>No app details available</Typography>;
+		return <Typography>No app details available right now. Try refreshing!</Typography>;
 	}
 
   const detailsData = [
     { field: 'Name', value: appDetails.name },
     { field: 'App ID', value: appDetails.steam_appid },
-    { field: 'Short Description', value: appDetails.short_description },
+    { field: 'Description', value: appDetails.short_description },
     { field: 'Developers', value: appDetails.developers ? appDetails.developers.join(', ') : 'N/A' },
     { field: 'Publishers', value: appDetails.publishers ? appDetails.publishers.join(', ') : 'N/A' },
     { field: 'Price', value: appDetails.price_overview ? `${appDetails.price_overview.final_formatted}` : 'Free to Play' },

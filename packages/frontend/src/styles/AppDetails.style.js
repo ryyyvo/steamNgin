@@ -12,36 +12,33 @@ export const StyledPaper = styled(Paper)(({ theme }) => ({
 export const StyledTable = styled(Table)(({ theme }) => ({
   tableLayout: 'fixed',
   width: '100%',
+  '& .MuiTableCell-root': {
+    borderBottom: '1px solid #2a475e',
+  },
 }));
 
-export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  borderBottom: '1px solid #2a475e',
-  color: '#c7d5e0',
+export const StyledTableCellHeader = styled(TableCell)(({ theme }) => ({
+  width: '20% !important',
+  backgroundColor: '#2a475e !important',
+  color: '#66c0f4 !important',
+  fontWeight: 'bold !important',
+  padding: theme.spacing(2),
   wordBreak: 'break-word',
   overflowWrap: 'break-word',
   whiteSpace: 'normal',
+}));
+
+export const StyledTableCellContent = styled(TableCell)(({ theme }) => ({
+  width: '80% !important',
+  backgroundColor: '#1b2838 !important',
+  color: '#c7d5e0 !important',
   padding: theme.spacing(2),
-}));
-
-export const StyledTableCellHeader = styled(StyledTableCell)(({ theme }) => ({
-  width: '30%',
-  backgroundColor: '#2a475e',
-  color: '#66c0f4',
-  fontWeight: 'bold',
-}));
-
-export const StyledTableCellContent = styled(StyledTableCell)(({ theme }) => ({
-  width: '70%',
-  backgroundColor: '#1b2838',
+  wordBreak: 'break-word',
+  overflowWrap: 'break-word',
+  whiteSpace: 'normal',
 }));
 
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:hover': {
-    backgroundColor: '#66c0f4',
-    '& > .MuiTableCell-root': {
-      color: '#1b2838',
-    },
-  },
 }));
 
 export const HeaderImage = styled('img')({
