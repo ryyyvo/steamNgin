@@ -54,21 +54,19 @@ https://store.steampowered.com/api/appdetails?appids=730&filters=basic
 
 https://wiki.teamfortress.com/wiki/User:RJackson/StorefrontAPI  : info about what the api contains
 
-appid
 name
-is_free
+appid
+short_description
 header_image
-developers (optional)
+developers (optional field)
 publishers
-price_overview (optional. omitted if free-to-play)
-packages
-package_groups
+price_overview (optional field. omitted if free-to-play)
 platforms:
     - windows
     - mac
     - linux
-categories (optional)
-genres (optional)
+categories (optional field)
+genres (optional field)
 release_date
 price (hopefully. price on other keyshops)
 */
